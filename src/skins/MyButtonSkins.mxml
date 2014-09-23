@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		xmlns:mx="library://ns.adobe.com/flex/mx"
+		>
+	<!-- host component -->
+	<fx:Metadata>
+		[HostComponent("component.MyButton")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			static private const exclusions:Array = ["labelDisplay","image"];
+		]]>
+	</fx:Script>
+	<!-- states -->
+	<s:states>
+		<s:State name="disabled" />
+		<s:State name="down" />
+		<s:State name="over" />
+		<s:State name="up" />
+	</s:states>
+	
+	<!-- SkinParts
+	name=iconDisplay, type=spark.primitives.BitmapImage, required=false
+	name=labelDisplay, type=spark.core.IDisplayText, required=false
+	name=image, type=spark.components.Image, required=false
+	-->
+	
+	<s:Image id="image" left="0" right="0" top="0" bottom="0" scaleMode="stretch"
+			 source.disabled="{hostComponent.disabledImage}"
+			 source.up="{hostComponent.upImage}"
+			 source.over="{hostComponent.overImage}"
+			 source.down="{hostComponent.downImage}"/>
+	
+	<s:Label id="labelDisplay"
+			 textAlign="center"
+			 maxDisplayedLines="1"
+			 horizontalCenter="0" verticalCenter="1" verticalAlign="middle"
+			 left="10" right="10" top="2" bottom="2">
+	</s:Label>
+</s:Skin>
