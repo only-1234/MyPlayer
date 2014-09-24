@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
 					   xmlns:s="library://ns.adobe.com/flex/spark" 
-					   xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:component="component.*">
+					   xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:component="component.*" xmlns:view="view.*">
 	<fx:Script>
 		<![CDATA[
 			import config.ResourceConfig;
@@ -17,9 +17,9 @@
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
-	<s:VideoPlayer />
-	<component:MyButton skinClass="skins.MyButtonSkins" click="mybutton1_imageClickHandler(event)"
+	<view:MyVideoPlayer backgroundColor="0x123456" width="800" height="600" skinClass="skins.MyVideoPlayer"/>
+	<!--<component:MyButton skinClass="skins.MyButtonSkins" click="mybutton1_imageClickHandler(event)"
 						upImage="{ResourceConfig.MyBtn_Play_Up}"
-						downImage="{ResourceConfig.MyBtn_Play_Down}"/>
+						downImage="{ResourceConfig.MyBtn_Play_Down}"/>-->
 	
 </s:WindowedApplication>
