@@ -11,15 +11,11 @@
 				// TODO Auto-generated method stub
 				
 			}
-			
 		]]>
 	</fx:Script>
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
-	<view:MyVideoPlayer backgroundColor="0x123456" width="800" height="600" skinClass="skins.MyVideoPlayer"/>
-	<!--<component:MyButton skinClass="skins.MyButtonSkins" click="mybutton1_imageClickHandler(event)"
-						upImage="{ResourceConfig.MyBtn_Play_Up}"
-						downImage="{ResourceConfig.MyBtn_Play_Down}"/>-->
-	
+	<!--<s:VideoPlayer source="test.flv"  width="800" height="600" />-->
+	<view:MyVideoPlayer source="test.flv" backgroundColor="0x123456" width="800" height="600" skinClass="skins.MyVideoPlayer"/>
 </s:WindowedApplication>

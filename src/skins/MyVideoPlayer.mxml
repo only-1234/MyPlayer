@@ -45,15 +45,15 @@
 				<s:SolidColorStroke weight="1" color="0x000000"/>
 			</s:stroke>
 		</s:Rect>
-		<s:VideoDisplay id="videoDisplay" left="1" right="1" top="1" bottom="24"
+		<s:VideoDisplay id="videoDisplay" doubleClickEnabled="true" left="1" right="1" top="1" bottom="24"
 						bottom.FullScreen="0"/>
 		<s:HGroup left="0" right="0" height="24" bottom="0" >
 			<component:MyButton id="playBtn" skinClass="skins.MyButtonSkins"
 								upImage="{ResourceConfig.MyBtn_Play_Up}"
 								downImage="{ResourceConfig.MyBtn_Play_Down}"/>
 			<component:MyButton id="pauseBtn" skinClass="skins.MyButtonSkins"
-								upImage="{ResourceConfig.MyBtn_Play_Up}"
-								downImage="{ResourceConfig.MyBtn_Play_Down}"/>
+								upImage="{ResourceConfig.MyBtn_Pause_Up}"
+								downImage="{ResourceConfig.MyBtn_Pause_Down}"/>
 			<component:MyButton id="stopBtn" skinClass="skins.MyButtonSkins"
 								upImage="{ResourceConfig.MyBtn_Play_Up}"
 								downImage="{ResourceConfig.MyBtn_Play_Down}"/>
