@@ -2,9 +2,12 @@ package view
 {
 	import component.MyButton;
 	
+	import event.EventBase;
+	
 	import flash.display.DisplayObject;
 	import flash.display.StageDisplayState;
 	import flash.events.FullScreenEvent;
+	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
 	
@@ -187,38 +190,63 @@ package view
 			
 		}
 		
+		private var beforeFullScreenInfo:Object;
+		
 		protected function videoDoubleClickHandler(event:MouseEvent):void
 		{
 			// TODO Auto-generated method stub
 			if(__fullScreen ==true)
 			{
 				__fullScreen =false;
+				exitFullScreen();
 			}
 			else
 			{
 				__fullScreen = true;
+				entryFullScreen();
 			}
 			invalidateSkinState();
+			
+		}
+		
+		private function entryFullScreen():void
+		{
+			beforeFullScreenInfo = new Object();
+			beforeFullScreenInfo.x = this.x;
+			beforeFullScreenInfo.y = this.y;
+			beforeFullScreenInfo.height = this.height;
+			beforeFullScreenInfo.width = this.width;
+			beforeFullScreenInfo.percentHeight = this.percentHeight;
+			beforeFullScreenInfo.percentWidth = this.percentWidth;
+			beforeFullScreenInfo.isPop = true;
+			beforeFullScreenInfo.parent = parent;
+			beforeFullScreenInfo.explicitWidth = this.explicitWidth;
+			beforeFullScreenInfo.explicitHeight = this.explicitHeight;
+			
 			var screenBounds:Rectangle = getScreenBounds();
 			if (parent is IVisualElementContainer)
 			{
 				var ivec:IVisualElementContainer = IVisualElementContainer(parent);
-//				beforeFullScreenInfo.childIndex = ivec.getElementIndex(this);
+				beforeFullScreenInfo.childIndex = ivec.getElementIndex(this);
 				ivec.removeElement(this);
 			}
 			else
 			{
-//				beforeFullScreenInfo.childIndex = parent.getChildIndex(this);
+				beforeFullScreenInfo.childIndex = parent.getChildIndex(this);
 				parent.removeChild(this);
 			}
 			PopUpManager.addPopUp(this, FlexGlobals.topLevelApplication as DisplayObject, false, null, moduleFactory);
+			
 			
 			this.width =screenBounds.width;
 			this.height =screenBounds.height; 
 			setLayoutBoundsSize(screenBounds.width, screenBounds.height, true);
 			setLayoutBoundsPosition(0, 0, true);
+			
 			if (videoDisplay.videoObject)
 			{
+				beforeFullScreenInfo.smoothing = videoDisplay.videoObject.smoothing;
+				beforeFullScreenInfo.deblocking = videoDisplay.videoObject.deblocking;
 				videoDisplay.videoObject.smoothing = false;
 				videoDisplay.videoObject.deblocking = 0;
 			}
@@ -226,16 +254,55 @@ package view
 			this.validateNow();
 			
 			systemManager.stage.addEventListener(FullScreenEvent.FULL_SCREEN, fullScreenEventHandler);
-			
-			// TODO (rfrishbe): Should we make this FULL_SCREEN_INTERACTIVE if in AIR?
 			systemManager.stage.displayState = StageDisplayState.FULL_SCREEN;
 		}
 		
-		protected function fullScreenEventHandler(event:FullScreenEvent):void
+		private function exitFullScreen():void
 		{
-			// TODO Auto-generated method stub
+			systemManager.stage.removeEventListener(FullScreenEvent.FULL_SCREEN, fullScreenEventHandler);
+			systemManager.stage.displayState = StageDisplayState.NORMAL;
+			PopUpManager.removePopUp(this);
+			
+			if (videoDisplay.videoObject)
+			{
+				videoDisplay.videoObject.smoothing = beforeFullScreenInfo.smoothing;
+				videoDisplay.videoObject.deblocking = beforeFullScreenInfo.deblocking;
+			}
+			
+			this.x = beforeFullScreenInfo.x;
+			this.y = beforeFullScreenInfo.y;
+			this.height = beforeFullScreenInfo.height;
+			this.width = beforeFullScreenInfo.width;
+			this.percentHeight = beforeFullScreenInfo.percentHeight;
+			this.percentWidth = beforeFullScreenInfo.percentWidth;
+			this.explicitWidth = beforeFullScreenInfo.explicitWidth;
+			this.explicitHeight = beforeFullScreenInfo.explicitHeight;
+			
+			if (beforeFullScreenInfo.parent is IVisualElementContainer)
+			{
+				var ivec:IVisualElementContainer = IVisualElementContainer(beforeFullScreenInfo.parent);
+				beforeFullScreenInfo.parent.addElementAt(this,beforeFullScreenInfo.childIndex);
+			}
+			else
+			{
+				beforeFullScreenInfo.parent.addChildAt(this,beforeFullScreenInfo.childIndex);
+			}
+			beforeFullScreenInfo =null;
+			
+			invalidateProperties();
+			invalidateSkinState();
+			invalidateSize();
+			invalidateDisplayList();
 			
 		}
+		
+		protected function fullScreenEventHandler(evt:FullScreenEvent):void
+		{
+			if (evt.fullScreen)
+				return;
+			videoDoubleClickHandler(null);
+		}
+		
 		mx_internal function getScreenBounds():Rectangle
 		{       
 			var resultRect:Rectangle = new Rectangle(0, 0, stage.fullScreenWidth, stage.fullScreenHeight);
@@ -244,7 +311,6 @@ package view
 		}
 		override protected function partRemoved(partName:String, instance:Object):void
 		{
-			// TODO Auto Generated method stub
 			super.partRemoved(partName, instance);
 			if(instance == playBtn)
 			{
@@ -290,7 +356,6 @@ package view
 		
 		override protected function commitProperties():void
 		{
-			// TODO Auto Generated method stub
 			super.commitProperties();
 			if(__sourceChange)
 			{
@@ -310,12 +375,10 @@ package view
 		protected function volumeClickHandler(event:MouseEvent):void
 		{
 			// TODO Auto-generated method stub
-			
 		}
 		
 		protected function openClickHandler(event:MouseEvent):void
 		{
-			// TODO Auto-generated method stub
 			
 		}
 		protected function playClickHandler(event:MouseEvent):void
