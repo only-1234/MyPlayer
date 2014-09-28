@@ -6,6 +6,7 @@ package view
 	
 	import flash.display.DisplayObject;
 	import flash.display.StageDisplayState;
+	import flash.events.Event;
 	import flash.events.FullScreenEvent;
 	import flash.events.KeyboardEvent;
 	import flash.events.MouseEvent;
@@ -14,12 +15,24 @@ package view
 	import mx.core.FlexGlobals;
 	import mx.core.IVisualElementContainer;
 	import mx.core.mx_internal;
+	import mx.events.EffectEvent;
 	import mx.managers.PopUpManager;
 	
+	import org.osmf.events.LoadEvent;
+	import org.osmf.events.MediaPlayerStateChangeEvent;
+	import org.osmf.events.TimeEvent;
+	
 	import spark.components.Button;
+	import spark.components.Group;
+	import spark.components.HGroup;
+	import spark.components.HSlider;
+	import spark.components.ProgressBar;
 	import spark.components.SkinnableContainer;
 	import spark.components.VideoDisplay;
 	import spark.components.VideoPlayer;
+	import spark.effects.Fade;
+	import spark.events.TrackBaseEvent;
+	import spark.primitives.Rect;
 
 	[SkinState("FullScreen")]
 	
@@ -124,6 +137,18 @@ package view
 		[SkinPart(required="false")]
 		public var stopBtn:MyButton;
 		
+		[SkinPart(required="false")]
+		public var fullBtn:MyButton;
+		
+		[SkinPart(required="false")]
+		public var proBar:HSlider;
+		
+		[SkinPart(required="false")]
+		public var controllerBar:HGroup;
+		
+		[SkinPart(required="false")]
+		public var focus:Group;
+		
 		private var __sourceChange:Boolean = false;
 		
 		private var __playing:Boolean;
@@ -131,7 +156,6 @@ package view
 		public function get playing():Boolean
 		{
 			return videoDisplay.playing
-			//return __playing;
 		}
 
 		private var __source:Object;
@@ -161,6 +185,16 @@ package view
 			if(instance == videoDisplay)
 			{
 				videoDisplay.addEventListener(MouseEvent.DOUBLE_CLICK,videoDoubleClickHandler);
+				
+				videoDisplay.addEventListener(TimeEvent.CURRENT_TIME_CHANGE, videoDisplay_currentTimeChangeHandler);
+				videoDisplay.addEventListener(LoadEvent.BYTES_LOADED_CHANGE, videoDisplay_bytesLoadedChangeHandler);
+				videoDisplay.addEventListener(MediaPlayerStateChangeEvent.MEDIA_PLAYER_STATE_CHANGE, videoDisplay_mediaPlayerStateChangeHandler);
+				videoDisplay.addEventListener(TimeEvent.DURATION_CHANGE, videoDisplay_durationChangeHandler);
+				videoDisplay.addEventListener(TimeEvent.COMPLETE, dispatchEvent);
+				
+				// just strictly for binding purposes
+				videoDisplay.addEventListener("sourceChanged", dispatchEvent);
+				videoDisplay.addEventListener("volumeChanged", videoDisplay_volumeChangedHandler);
 			}
 			
 			if(instance == playBtn)
@@ -188,6 +222,65 @@ package view
 				stopBtn.addEventListener(MouseEvent.CLICK,stopClickHandler);
 			}
 			
+			if(instance ==fullBtn)
+			{
+				fullBtn.addEventListener(MouseEvent.CLICK,fullClickHandler);
+			}
+			
+			if(instance == proBar)
+			{
+				proBar.addEventListener(TrackBaseEvent.THUMB_PRESS, scrubBar_thumbPressHandler);
+				proBar.addEventListener(TrackBaseEvent.THUMB_RELEASE, scrubBar_thumbReleaseHandler);
+				proBar.addEventListener(Event.CHANGE, scrubBar_changeHandler);
+			}
+			
+		}
+		
+		override protected function partRemoved(partName:String, instance:Object):void
+		{
+			super.partRemoved(partName, instance);
+			if(instance == playBtn)
+			{
+				playBtn.removeEventListener(MouseEvent.CLICK,playClickHandler);
+			}
+			
+			if(instance == pauseBtn)
+			{
+				pauseBtn.removeEventListener(MouseEvent.CLICK,pauseClickHandler);
+			}
+			
+			if(instance == openBtn)
+			{
+				openBtn.removeEventListener(MouseEvent.CLICK,openClickHandler);
+			}
+			
+			if(instance == volumeBtn)
+			{
+				volumeBtn.removeEventListener(MouseEvent.CLICK,volumeClickHandler);
+			}
+			
+			if(instance == stopBtn)
+			{
+				stopBtn.removeEventListener(MouseEvent.CLICK,stopClickHandler);
+			}
+			
+			if(instance ==fullBtn)
+			{
+				fullBtn.removeEventListener(MouseEvent.CLICK,fullClickHandler);
+			}
+			
+			if(instance ==proBar)
+			{
+				proBar.removeEventListener(TrackBaseEvent.THUMB_PRESS, scrubBar_thumbPressHandler);
+				proBar.removeEventListener(TrackBaseEvent.THUMB_RELEASE, scrubBar_thumbReleaseHandler);
+				proBar.removeEventListener(Event.CHANGE, scrubBar_changeHandler);
+			}
+		}
+		
+		protected function fullClickHandler(event:MouseEvent):void
+		{
+			// TODO Auto-generated method stub
+			this.videoDoubleClickHandler(null);
 		}
 		
 		private var beforeFullScreenInfo:Object;
@@ -198,15 +291,60 @@ package view
 			if(__fullScreen ==true)
 			{
 				__fullScreen =false;
+				removeFocusAnimate();
 				exitFullScreen();
 			}
 			else
 			{
 				__fullScreen = true;
+				addFocusAnimate();
 				entryFullScreen();
 			}
 			invalidateSkinState();
 			
+		}
+		
+		private function addFocusAnimate():void
+		{
+			focus.addEventListener(MouseEvent.MOUSE_OVER,MouseOverHandler);
+			focus.addEventListener(MouseEvent.MOUSE_OUT,MouseOutHandler);
+			fade = new Fade(controllerBar);
+			fade.addEventListener(EffectEvent.EFFECT_END,endEffectHandler);
+			fade.duration=500;
+		}
+		
+		private function removeFocusAnimate():void
+		{
+			focus.removeEventListener(MouseEvent.MOUSE_OVER,MouseOverHandler);
+			focus.removeEventListener(MouseEvent.MOUSE_OUT,MouseOutHandler);
+			fade.removeEventListener(EffectEvent.EFFECT_END,endEffectHandler);
+			fade.stop();
+			fade = null;
+		}
+		
+		private var fade:Fade;
+		private var currentAlpha:int =0;
+		
+		protected function MouseOverHandler(evt:MouseEvent):void
+		{
+			fade.end();
+			fade.alphaFrom=0;
+			fade.alphaTo =1;
+			currentAlpha =1;
+			fade.play();
+		}
+		
+		private function endEffectHandler(evt:EffectEvent):void
+		{
+			controllerBar.alpha= currentAlpha;
+		}
+		protected function MouseOutHandler(evt:MouseEvent):void
+		{
+			fade.end();
+			fade.alphaFrom=1;
+			fade.alphaTo =0;
+			currentAlpha =0;
+			fade.play();
 		}
 		
 		private function entryFullScreen():void
@@ -309,34 +447,7 @@ package view
 			
 			return resultRect;
 		}
-		override protected function partRemoved(partName:String, instance:Object):void
-		{
-			super.partRemoved(partName, instance);
-			if(instance == playBtn)
-			{
-				playBtn.removeEventListener(MouseEvent.CLICK,playClickHandler);
-			}
-			
-			if(instance == pauseBtn)
-			{
-				pauseBtn.removeEventListener(MouseEvent.CLICK,pauseClickHandler);
-			}
-			
-			if(instance == openBtn)
-			{
-				openBtn.removeEventListener(MouseEvent.CLICK,openClickHandler);
-			}
-			
-			if(instance == volumeBtn)
-			{
-				volumeBtn.removeEventListener(MouseEvent.CLICK,volumeClickHandler);
-			}
-			
-			if(instance == stopBtn)
-			{
-				stopBtn.removeEventListener(MouseEvent.CLICK,stopClickHandler);
-			}
-		}
+		
 		
 		override protected function getCurrentSkinState():String
 		{   
@@ -365,6 +476,35 @@ package view
 			}
 		}
 		
+		protected function videoDisplay_volumeChangedHandler(evt:Event):void
+		{
+			// TODO Auto-generated method stub
+			
+		}
+		
+		protected function videoDisplay_durationChangeHandler(evt:TimeEvent):void
+		{
+			// TODO Auto-generated method stub
+			proBar.maximum = evt.time;
+		}
+		
+		protected function videoDisplay_mediaPlayerStateChangeHandler(evt:MediaPlayerStateChangeEvent):void
+		{
+			// TODO Auto-generated method stub
+			evt.state;
+		}
+		
+		protected function videoDisplay_bytesLoadedChangeHandler(evt:LoadEvent):void
+		{
+			// TODO Auto-generated method stub
+			evt.bytes;
+		}
+		
+		protected function videoDisplay_currentTimeChangeHandler(evt:TimeEvent):void
+		{
+			// TODO Auto-generated method stub
+			proBar.value = evt.time;
+		}
 		
 		protected function stopClickHandler(event:MouseEvent):void
 		{
@@ -372,22 +512,40 @@ package view
 			videoDisplay.stop();
 		}
 		
-		protected function volumeClickHandler(event:MouseEvent):void
+		protected function volumeClickHandler(evt:MouseEvent):void
 		{
 			// TODO Auto-generated method stub
 		}
 		
-		protected function openClickHandler(event:MouseEvent):void
+		protected function openClickHandler(evt:MouseEvent):void
 		{
 			
 		}
-		protected function playClickHandler(event:MouseEvent):void
+		protected function playClickHandler(evt:MouseEvent):void
 		{
 			videoDisplay.play();
 		}
-		protected function pauseClickHandler(event:MouseEvent):void
+		protected function pauseClickHandler(evt:MouseEvent):void
 		{
 			videoDisplay.pause();
+		}
+		
+		protected function scrubBar_changeHandler(evt:Event):void
+		{
+			// TODO Auto-generated method stub
+			seek(proBar.value);
+		}
+		
+		protected function scrubBar_thumbReleaseHandler(evt:TrackBaseEvent):void
+		{
+			// TODO Auto-generated method stub
+			play();
+		}
+		
+		protected function scrubBar_thumbPressHandler(evt:TrackBaseEvent):void
+		{
+			// TODO Auto-generated method stub
+			pasue();
 		}
 		
 		public function play():void
@@ -401,6 +559,10 @@ package view
 		public function pasue():void
 		{
 			videoDisplay.pause();
+		}
+		public function seek(time:Number):void
+		{
+			videoDisplay.seek(time);
 		}
 	}
 }

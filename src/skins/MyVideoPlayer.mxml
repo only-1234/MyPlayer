@@ -3,7 +3,7 @@
 		xmlns:s="library://ns.adobe.com/flex/spark" 
 		xmlns:mx="library://ns.adobe.com/flex/mx" 
 		xmlns:component="component.*"
-		minHeight="400" width="400">
+		minHeight="400" width="400" xmlns:ns="http://flex.apache.org/experimental/ns">
 	<!-- host component -->
 	<fx:Metadata>
 		[HostComponent("view.MyVideoPlayer")]
@@ -12,7 +12,7 @@
 		<![CDATA[
 			import config.ResourceConfig;
 			static private const exclusions:Array = ["videoDisplay", "pauseBtn", "stopBtn", 
-				"openBtn", "playBtn", "volumeBtn"];
+				"openBtn", "playBtn", "volumeBtn","fullBtn","proBar","focus","controllerBar"];
 		]]>
 	</fx:Script>
 	<!-- states -->
@@ -45,9 +45,12 @@
 				<s:SolidColorStroke weight="1" color="0x000000"/>
 			</s:stroke>
 		</s:Rect>
-		<s:VideoDisplay id="videoDisplay" doubleClickEnabled="true" left="1" right="1" top="1" bottom="24"
+		<s:VideoDisplay id="videoDisplay" doubleClickEnabled="true" left="1" right="1" top="1" bottom="30"
 						bottom.FullScreen="0"/>
-		<s:HGroup left="0" right="0" height="24" bottom="0" >
+		<s:Group left="0" right="0" height="30" bottom="0" id="focus" alpha="0">
+			
+		</s:Group>
+		<s:HGroup left="0" right="0" height="30" bottom="0" verticalAlign="middle" gap="0" id="controllerBar">
 			<component:MyButton id="playBtn" skinClass="skins.MyButtonSkins"
 								upImage="{ResourceConfig.MyBtn_Play_Up}"
 								downImage="{ResourceConfig.MyBtn_Play_Down}"/>
@@ -55,15 +58,18 @@
 								upImage="{ResourceConfig.MyBtn_Pause_Up}"
 								downImage="{ResourceConfig.MyBtn_Pause_Down}"/>
 			<component:MyButton id="stopBtn" skinClass="skins.MyButtonSkins"
-								upImage="{ResourceConfig.MyBtn_Play_Up}"
-								downImage="{ResourceConfig.MyBtn_Play_Down}"/>
+								upImage="{ResourceConfig.MyBtn_Stop_Up}"
+								downImage="{ResourceConfig.MyBtn_Stop_Down}"/>
+			<s:HSlider id="proBar" width="100%" height="100%" stepSize="1" snapInterval="1"/>
 			<component:MyButton id="volumeBtn" skinClass="skins.MyButtonSkins"
-								upImage="{ResourceConfig.MyBtn_Play_Up}"
-								downImage="{ResourceConfig.MyBtn_Play_Down}"/>
+								upImage="{ResourceConfig.MyBtn_Sound_Up}"
+								downImage="{ResourceConfig.MyBtn_Sound_Down}"/>
 			<component:MyButton id="openBtn" skinClass="skins.MyButtonSkins"
-								upImage="{ResourceConfig.MyBtn_Play_Up}"
-								downImage="{ResourceConfig.MyBtn_Play_Down}"/>
-								
+								upImage="{ResourceConfig.MyBtn_Open_Up}"
+								downImage="{ResourceConfig.MyBtn_Open_Down}"/>
+			<component:MyButton id="fullBtn" skinClass="skins.MyButtonSkins"
+								upImage="{ResourceConfig.MyBtn_Full_Up}"
+								downImage="{ResourceConfig.MyBtn_Full_Down}"/>
 		</s:HGroup>
 	</s:Group>
 </s:Skin>
